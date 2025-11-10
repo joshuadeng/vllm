@@ -134,6 +134,31 @@ class PassConfig:
 
     # TODO(luka) better pass enabling system.
 
+    def flashinfer_max_size(self, world_size: int) -> int | None:
+        """
+        Returns the max communication size in bytes for flashinfer
+        allreduce fusion for the given world size. Returns None if world size
+        is not supported by configs as it's not supported by flashinfer.
+        """
+
+        MiB = 1024 * 1024
+        max_size_mb = self.fi_allreduce_fusion_max_size_mb
+        if max_size_mb is None:
+            max_size_mb = self.default_fi_allreduce_fusion_max_size_mb().get(world_size)
+
+        return int(max_size_mb * MiB) if max_size_mb is not None else None
+
+    @staticmethod
+    def default_fi_allreduce_fusion_max_size_mb() -> dict[int, float]:
+        from vllm.compilation.collective_fusion import FI_ALLREDUCE_FUSION_MAX_SIZE_MB
+        from vllm.platforms import current_platform
+
+        if not current_platform.is_cuda():
+            return {}
+        return FI_ALLREDUCE_FUSION_MAX_SIZE_MB.get(
+            current_platform.get_device_capability().to_int(), {}
+        )
+
     def uuid(self):
         """
         Produces a hash unique to the pass configuration.
