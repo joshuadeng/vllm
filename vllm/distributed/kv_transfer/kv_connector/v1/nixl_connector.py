@@ -1189,7 +1189,7 @@ class NixlConnectorWorker:
 
         self.device_kv_caches = kv_caches
         self.dst_num_blocks[self.engine_id] = self.num_blocks
-        if self.kv_topo.is_kv_layout_blocks_first::
+        if self.kv_topo.is_kv_layout_blocks_first:
             for i in range(len(self.slot_size_per_layer)):
                 assert self.slot_size_per_layer[i] % 2 == 0
                 self.slot_size_per_layer[i] //= 2
@@ -1217,7 +1217,7 @@ class NixlConnectorWorker:
                 # (addr, len, device id)
                 blocks_data.append((addr, kv_block_len, self.device_id))
 
-            if self.kv_topo.is_kv_layout_blocks_first::
+            if self.kv_topo.is_kv_layout_blocks_first:
                 # Separate and interleave K/V regions to maintain the same
                 # descs ordering. This is needed for selecting contiguous heads
                 # when split across TP ranks.
@@ -1379,7 +1379,7 @@ class NixlConnectorWorker:
                 # (addr, len, device id)
                 blocks_data.append((addr, kv_block_len, nixl_agent_meta.device_id))
 
-            if self.kv_topo.is_kv_layout_blocks_first::
+            if self.kv_topo.is_kv_layout_blocks_first:
                 # With FlashInfer index V separately to allow head splitting.
                 for block_id in range(nixl_agent_meta.num_blocks):
                     block_offset = block_id * nixl_agent_meta.block_lens[i]
@@ -1462,7 +1462,7 @@ class NixlConnectorWorker:
             remote_block_size = remote_block_len // (
                 self.slot_size_per_layer[0] * tp_ratio
             )
-            if self.kv_topo.is_kv_layout_blocks_first::
+            if self.kv_topo.is_kv_layout_blocks_first:
                 # With flashinfer, KV are sent in the same message.
                 remote_block_size //= 2
 
@@ -1948,7 +1948,7 @@ class NixlConnectorWorker:
         For FlashInfer, this is half the length of the whole block, as K and V
         share the same region.
         """
-        if self.kv_topo.is_kv_layout_blocks_first::
+        if self.kv_topo.is_kv_layout_blocks_first:
             # For indexing only half (either just the K or V part).
             block_len = self.block_len_per_layer[layer_idx] // 2
         else:
